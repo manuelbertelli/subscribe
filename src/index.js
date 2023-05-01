@@ -3,8 +3,8 @@ const importDutyRate = 5;
 const exceptions = ['book', 'food', 'medical'];
 
 // Map primitives to function values
-function price(aBasket) {
-    return aBasket.price || 0;
+function price({ price = 0}) {
+    return price;
 }
 
 function total({ total = 0 }) {
@@ -30,39 +30,32 @@ function itemTotal(aBasket) {
     return price(aBasket) * quantity(aBasket);
 }
 
-function itemSaleTax(aBasket) {
-    return 
+function roundToNearestFiveCents(num) {
+    const cleaned = Number(withTwoDecimals(num));
+    const remainder = Number(withTwoDecimals(cleaned % 0.1));
+
+    if (remainder > 0.05) return num;
+
+    return Number(withTwoDecimals(cleaned + (0.05 - remainder)));
 }
 
-function taxes({ salesTax = 0, importDuty = 0 }) {
-    return salesTax + importDuty;
-}
-
-function roundedSalesTax(aSalesTax) {
-    return roundTo5centsUp(aSalesTax);
-}
-
-function roundTo5centsUp(aValue) {
-    return Math.ceil(aValue / 0.05) * 0.05;
-}
-
-function withTwoDigits(aFloat) {
+function withTwoDecimals(aFloat = 0) {
     return aFloat.toFixed(2);
 }
 
 function salesTax(aGood) {
-    return !exceptions.includes(aGood.type) ? (roundedSalesTax(itemTotal(aGood) * basicSalesTaxRate / 100)) : 0
+    return !exceptions.includes(aGood.type) ? (roundToNearestFiveCents(itemTotal(aGood) * basicSalesTaxRate / 100)) : 0
 }
 
 function importDuty(aGood) {
-    return aGood.imported ? ((itemTotal(aGood) * importDutyRate)/100) : 0;
+    return aGood.imported ? (roundToNearestFiveCents(itemTotal(aGood) * importDutyRate)/100) : 0;
 }
 
 function orderItem(aBasketItem) {
     const totalBaseTax = salesTax(aBasketItem) * quantity(aBasketItem);
-    const total = itemTotal(aBasketItem) + totalBaseTax + importDuty(aBasketItem);
-    const aSalesTax = roundedSalesTax(totalBaseTax + importDuty(aBasketItem));
-    
+    const total = roundToNearestFiveCents(itemTotal(aBasketItem) + totalBaseTax + importDuty(aBasketItem));
+    const aSalesTax = roundToNearestFiveCents(totalBaseTax + importDuty(aBasketItem));
+
     return {
         ...aBasketItem,
         total,
@@ -74,6 +67,14 @@ function receiptLineItem(anItem) {
     const imported = anItem.imported ? ' imported' : '';
 
     return `${anItem.quantity}${imported} ${anItem.description}: ${receiptTotal(anItem)}`;
+}
+
+function receiptSalesTaxes({ salesTaxes = 0 }) {
+    return withTwoDecimals(salesTaxes);
+}
+
+function receiptTotal(anOrder) {
+    return withTwoDecimals(total(anOrder));
 }
 
 function toOrder(anOrder, aBasketItem) {
@@ -91,36 +92,27 @@ function toOrder(anOrder, aBasketItem) {
 }
 
 function toSalesTaxes(salesTaxes, anItem) {
-    return salesTaxes + salesTax(anItem) + importDuty(anItem);
+    return roundToNearestFiveCents(salesTaxes + salesTax(anItem) + importDuty(anItem));
 }
 
 function toSubtotal(subtotal, aLineItem) {
-    return subtotal + total(aLineItem);
+    return roundToNearestFiveCents(subtotal + total(aLineItem));
 }
 
 function toTotal(partialTotal, aGood) {
     return partialTotal + salesTax(aGood) + importDuty(aGood) + itemTotal(aGood);
 }
 
-function receiptSalesTaxes(anOrder) {
-    return withTwoDigits(roundedSalesTax(anOrder));
-}
-
-function receiptTotal(anOrder) {
-    return withTwoDigits(total(anOrder));
-}
-
-// todo: round rule for calculated amounts
-// todo: calculate quantity * unityPrice + baseTax = base price before apply import duty
-
 function receipt(aBasket) {
     const anOrder = aBasket.reduce(toOrder, {});
 
-    // Why so ugly? :)
-    return `
+    return (
+`
 ${orderItems(anOrder).map(receiptLineItem).join('\n')}
 Sales Taxes: ${receiptSalesTaxes(anOrder)}
-Total: ${receiptTotal(anOrder)}`;
+Total: ${receiptTotal(anOrder)}
+`
+    );
 }
 
 
