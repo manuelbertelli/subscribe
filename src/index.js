@@ -53,10 +53,19 @@ function order(aBasket) {
 }
 
 function item(aBasketItem) {
-    // const baseTax = salesTax(aBasketItem) * quantity(aBasketItem);
+    // price * importRate
+    // 11.25 * 0.05
+    // 0.5625 = importTax
+    // cost = importTax + price
+    // (11.25 * 0.05) + 11.25
+    // 11.8125 = cost
+    // 11.85 = rounded(cost)
+    // 11.85 * 3
+    // 35.55 = rounded(cost) * quantity
+    // this only works for the basket 3 case
+
     const baseTax = baseSalesTax(aBasketItem);
     const importTax = importDuty(aBasketItem);
-    // const salesTax = 0;
     const salesTax = roundToNearestFiveCents((baseTax + importTax) * quantity(aBasketItem));
     const total = salesTax + cost(aBasketItem);
 
@@ -64,7 +73,7 @@ function item(aBasketItem) {
         ...aBasketItem,
         salesTax,
         total
-    };a
+    };
 }
 
 function receiptLineItem(anItem) {

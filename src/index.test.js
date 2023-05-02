@@ -37,27 +37,27 @@ const basket2 = [
   }
 ]
 const basket3 = [
-  // {
-  //     type: 'cosmetic',
-  //     description: 'bottle of perfume',
-  //     imported: true,
-  //     quantity: 1,
-  //     price: 27.99
-  // },
-  // {
-  //     type: 'cosmetic',
-  //     description: 'bottle of perfume',
-  //     imported: false,
-  //     quantity: 1,
-  //     price: 18.99
-  // },
-  // {
-  //     type: 'medical',
-  //     description: 'packet of headache pills',
-  //     imported: false,
-  //     quantity: 1,
-  //     price: 9.75
-  // },
+  {
+      type: 'cosmetic',
+      description: 'bottle of perfume',
+      imported: true,
+      quantity: 1,
+      price: 27.99
+  },
+  {
+      type: 'cosmetic',
+      description: 'bottle of perfume',
+      imported: false,
+      quantity: 1,
+      price: 18.99
+  },
+  {
+      type: 'medical',
+      description: 'packet of headache pills',
+      imported: false,
+      quantity: 1,
+      price: 9.75
+  },
   {
       type: 'food',
       description: 'box of chocolates',
